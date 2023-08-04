@@ -6,5 +6,10 @@ build:
 test:
 	go test ./...
 
+.PHONY: lint
 lint:
 	docker run --rm -v $(shell pwd):/app -v $(pwd)/.cache/golangci-lint:/root/.cache -w /app golangci/golangci-lint:v1.53.3 golangci-lint run -v ./...
+
+.PHONY: goreleaser-snapshot
+goreleaser-snapshot:
+	goreleaser release --snapshot --clean --skip-publish
