@@ -8,7 +8,6 @@ import (
 
 	"github.com/gomarkdown/markdown/ast"
 	"github.com/gomarkdown/markdown/parser"
-
 )
 
 type CodeBlock struct {
@@ -17,7 +16,7 @@ type CodeBlock struct {
 	Code    string
 }
 
-func markdownToBash(out io.Writer, md []byte) {
+func markdownCodeBlocks(md []byte) []CodeBlock {
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
 	p := parser.NewWithExtensions(extensions)
 	doc := p.Parse(md)
@@ -25,43 +24,56 @@ func markdownToBash(out io.Writer, md []byte) {
 	var headings [10]string
 	var currHeadingLevel = 0
 	var id = 0
+	var codeblocks []CodeBlock
 
 	for _, c := range doc.GetChildren() {
-		id += 1
-		switch c.(type) {
+		id++
+		switch node := c.(type) {
 		case *ast.Heading:
-			hdr := c.(*ast.Heading)
+			hdr := node
 			text := getCombinedText(c.GetChildren())
 			headings[hdr.Level] = text
 			currHeadingLevel = hdr.Level
 			id = 0 // IDs reset within headings
 		case *ast.CodeBlock:
-			cblk := c.(*ast.CodeBlock)
-			//fmt.Printf("CodeBlock1  %+v\n", cblk)
-			//fmt.Printf("CodeBlock2  %v\n", string(cblk.Info))
-			//fmt.Printf("CodeBlock3  \n%v\n", string(cblk.Literal))
-			blockHeading := strings.Join(headings[1:currHeadingLevel], "  ") + fmt.Sprintf("_%04d", id)
+			cblk := node
+			blockHeading := strings.Join(headings[1:currHeadingLevel+1], "  ") + fmt.Sprintf("_%04d", id)
 			blockHeading = strings.ReplaceAll(blockHeading, " ", "_")
 			blockHeading = strings.ReplaceAll(blockHeading, "-", "_")
 			blockHeading = strings.ToLower(blockHeading)
-			funcName := "_f_" + blockHeading
-			varName := "_v_" + blockHeading
-			fmt.Fprintf(out, "#######################\n")
-			// As variable
-			fmt.Fprintf(out, "read -r -d '' %v <<'EOF'\n", varName)
-			fmt.Fprintf(out, "%v\n", string(cblk.Literal))
-			fmt.Fprintf(out, "EOF\n")
 
-			// As function
-			fmt.Fprintf(out, "%v() {\n", funcName)
-			fmt.Fprintf(out, "  echo \"----------------------\"\n")
-			fmt.Fprintf(out, "  echo \"### Executing: %v\"\n", funcName)
-			fmt.Fprintf(out, "  echo \"$%v\"\n", varName)
-			fmt.Fprintf(out, "  %v\n", strings.ReplaceAll(string(cblk.Literal), "\n", "\n  "))
-			fmt.Fprintf(out, "}\n")
-
-			fmt.Fprintf(out, "\n")
+			fmt.Printf("Add %v\n", blockHeading)
+			codeblocks = append(codeblocks,
+				CodeBlock{
+					Code:    string(cblk.Literal),
+					Heading: blockHeading,
+					Info:    string(cblk.Info),
+				})
 		}
+	}
+	return codeblocks
+}
+
+func exportToBash(codeblocks []CodeBlock, out io.Writer) {
+	for idx := range codeblocks {
+		blk := &codeblocks[idx]
+		funcName := "_f_" + blk.Heading
+		varName := "_v_" + blk.Heading
+		fmt.Fprintf(out, "#######################\n")
+		// As variable
+		fmt.Fprintf(out, "read -r -d '' %v <<'EOF'\n", varName)
+		fmt.Fprintf(out, "%v\n", blk.Code)
+		fmt.Fprintf(out, "EOF\n")
+
+		// As function
+		fmt.Fprintf(out, "%v() {\n", funcName)
+		fmt.Fprintf(out, "  echo \"----------------------\"\n")
+		fmt.Fprintf(out, "  echo \"### Executing: %v\"\n", funcName)
+		fmt.Fprintf(out, "  echo \"$%v\"\n", varName)
+		fmt.Fprintf(out, "  %v\n", strings.ReplaceAll(blk.Code, "\n", "\n  "))
+		fmt.Fprintf(out, "}\n")
+
+		fmt.Fprintf(out, "\n")
 	}
 	fmt.Print("\n")
 }
@@ -72,13 +84,11 @@ func markdownToBash(out io.Writer, md []byte) {
 func getCombinedText(nodes []ast.Node) string {
 	var text string
 	for _, c := range nodes {
-		switch c.(type) {
+		switch node := c.(type) {
 		case *ast.Text:
-			txt := c.(*ast.Text)
-			text += string(txt.Literal)
+			text += string(node.Literal)
 		case *ast.Code:
-			cblk := c.(*ast.Code)
-			text += string(cblk.Literal)
+			text += string(node.Literal)
 		}
 	}
 	return text
@@ -89,5 +99,6 @@ func main() {
 	if err != nil {
 		panic("*** Error reading stdin")
 	}
-	markdownToBash(os.Stdout, md)
+	codeblocks := markdownCodeBlocks(md)
+	exportToBash(codeblocks, os.Stdout)
 }
