@@ -42,7 +42,6 @@ func markdownCodeBlocks(md []byte) []CodeBlock {
 			blockHeading = strings.ReplaceAll(blockHeading, "-", "_")
 			blockHeading = strings.ToLower(blockHeading)
 
-			fmt.Printf("Add %v\n", blockHeading)
 			codeblocks = append(codeblocks,
 				CodeBlock{
 					Code:    string(cblk.Literal),

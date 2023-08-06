@@ -1,3 +1,6 @@
+VERSION=$(shell git describe --tags --always --dirty)
+IMAGE_VERSION=sha-$(shell git describe --tags --always)-$(shell dpkg --print-architecture)
+
 .PHONY: build
 build:
 	go build ./...
@@ -13,3 +16,7 @@ lint:
 .PHONY: goreleaser-snapshot
 goreleaser-snapshot:
 	HEAD_SHA=$(shell git rev-parse --short HEAD) goreleaser release --snapshot --clean --skip-publish --skip-sign
+
+.PHONY: run-readme-example-local
+run-readme-example-local:
+	cat README.md | docker run --rm -i ghcr.io/local/markdown2bash:$(IMAGE_VERSION) > readme.sh
