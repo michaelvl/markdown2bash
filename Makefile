@@ -12,4 +12,4 @@ lint:
 
 .PHONY: goreleaser-snapshot
 goreleaser-snapshot:
-	goreleaser release --snapshot --clean --skip-publish
+	HEAD_SHA=$(shell git rev-parse --short HEAD) goreleaser release --snapshot --clean --skip-publish --skip-sign
