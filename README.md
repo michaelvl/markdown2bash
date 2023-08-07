@@ -65,4 +65,6 @@ with `_v_`.
 From these function and variable definitions, we can construct tests
 that use the actual code from markdown documentation. See
 [test/readme-example-test.sh](test/readme-example-test.sh) for an
-example that test the code blocks above.
+example that test the code blocks above. See also the GitHub action
+[e2e-tests.yaml](.github/workflows/e2e-tests.yaml) for how
+`mardown2bash` is used to test the code blocks above.

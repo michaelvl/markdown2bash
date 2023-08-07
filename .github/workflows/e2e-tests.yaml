@@ -1,0 +1,19 @@
+name: Run e2e tests
+
+on: push
+
+jobs:
+  e2e-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # tag=v3.5.3
+        with:
+          fetch-depth: 0
+
+      - name: Use markdown2bash to test itself
+        run: |
+          cat README.md | docker run --rm -i ghcr.io/michaelvl/markdown2bash:0.0.2 > readme.sh
+          test/readme-example-test.sh
