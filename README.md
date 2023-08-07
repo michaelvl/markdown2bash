@@ -37,6 +37,32 @@ We can automate testing of this documentation using the
 `markdown2bash` tool. First extract code blocks:
 
 ```bash
-export IMAGE_VERSION=0.0.1
-cat README.md | docker run --rm -i ghcr.io/local/markdown2bash:$(IMAGE_VERSION) > readme.sh
+export IMAGE_VERSION=0.0.2
+cat README.md | docker run --rm -i ghcr.io/michaelvl/markdown2bash:$(IMAGE_VERSION) > readme.sh
 ```
+
+This will generate a shell script that e.g. includes the first code
+block both as a function and a variable:
+
+```bash
+read -r -d '' _v_getting_started_0001 <<'EOF_5577006791947779410'
+export FOO=hello
+export BAR=world
+EOF_5577006791947779410
+
+_f_getting_started_0001() {
+  export FOO=hello
+  export BAR=world
+}
+```
+
+Note how the function/variable names are constructed from the
+lower-case version of the Headers (`getting_started`) in the markdown,
+followed by an incremented id (`0001`) to handle multiple code blocks
+per heading and function names start with a `_f_` prefix and variables
+with `_v_`.
+
+From these function and variable definitions, we can construct tests
+that use the actual code from markdown documentation. See
+[test/readme-example-test.sh](test/readme-example-test.sh) for an
+example that test the code blocks above.
