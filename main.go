@@ -61,7 +61,7 @@ func exportToBash(codeblocks []CodeBlock, out io.Writer) {
 		varName := "_v_" + blk.Heading
 		code := strings.TrimRight(blk.Code, "\n")
 		// We use a unique delimiter to quard against e.g. 'EOF' in the code block itself
-		delimiter := fmt.Sprintf("EOF_%v", rand.Int63())
+		delimiter := fmt.Sprintf("EOF_%v", rand.Int63()) //nolint:gosec // we want a pseudo-random value
 		fmt.Fprintf(out, "#######################\n")
 		// As variable
 		fmt.Fprintf(out, "read -r -d '' %v <<'%v'\n", varName, delimiter)
