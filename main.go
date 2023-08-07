@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"strings"
 
@@ -59,11 +60,13 @@ func exportToBash(codeblocks []CodeBlock, out io.Writer) {
 		funcName := "_f_" + blk.Heading
 		varName := "_v_" + blk.Heading
 		code := strings.TrimRight(blk.Code, "\n")
+		// We use a unique delimiter to quard against e.g. 'EOF' in the code block itself
+		delimiter := fmt.Sprintf("EOF_%v", rand.Int63())
 		fmt.Fprintf(out, "#######################\n")
 		// As variable
-		fmt.Fprintf(out, "read -r -d '' %v <<'EOF'\n", varName)
+		fmt.Fprintf(out, "read -r -d '' %v <<'%v'\n", varName, delimiter)
 		fmt.Fprintf(out, "%v\n", code)
-		fmt.Fprintf(out, "EOF\n\n")
+		fmt.Fprintf(out, "%v\n\n", delimiter)
 
 		// As function
 		fmt.Fprintf(out, "%v() {\n", funcName)
