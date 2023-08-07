@@ -67,4 +67,4 @@ that use the actual code from markdown documentation. See
 [test/readme-example-test.sh](test/readme-example-test.sh) for an
 example that test the code blocks above. See also the GitHub action
 [e2e-tests.yaml](.github/workflows/e2e-tests.yaml) for how
-`mardown2bash` is used to test the code blocks above.
+`markdown2bash` is used to test the code blocks above.
