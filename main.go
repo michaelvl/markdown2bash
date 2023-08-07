@@ -27,7 +27,6 @@ func markdownCodeBlocks(md []byte) []CodeBlock {
 	var codeblocks []CodeBlock
 
 	for _, c := range doc.GetChildren() {
-		id++
 		switch node := c.(type) {
 		case *ast.Heading:
 			hdr := node
@@ -36,6 +35,7 @@ func markdownCodeBlocks(md []byte) []CodeBlock {
 			currHeadingLevel = hdr.Level
 			id = 0 // IDs reset within headings
 		case *ast.CodeBlock:
+			id++
 			cblk := node
 			blockHeading := strings.Join(headings[1:currHeadingLevel+1], "  ") + fmt.Sprintf("_%04d", id)
 			blockHeading = strings.ReplaceAll(blockHeading, " ", "_")
