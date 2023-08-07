@@ -20,3 +20,4 @@ goreleaser-snapshot:
 .PHONY: run-readme-example-local
 run-readme-example-local:
 	cat README.md | docker run --rm -i ghcr.io/local/markdown2bash:$(IMAGE_VERSION) > readme.sh
+	test/readme-example-test.sh

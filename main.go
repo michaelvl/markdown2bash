@@ -58,18 +58,17 @@ func exportToBash(codeblocks []CodeBlock, out io.Writer) {
 		blk := &codeblocks[idx]
 		funcName := "_f_" + blk.Heading
 		varName := "_v_" + blk.Heading
+		code := strings.TrimRight(blk.Code, "\n")
 		fmt.Fprintf(out, "#######################\n")
 		// As variable
 		fmt.Fprintf(out, "read -r -d '' %v <<'EOF'\n", varName)
-		fmt.Fprintf(out, "%v\n", blk.Code)
-		fmt.Fprintf(out, "EOF\n")
+		fmt.Fprintf(out, "%v\n", code)
+		fmt.Fprintf(out, "EOF\n\n")
 
 		// As function
 		fmt.Fprintf(out, "%v() {\n", funcName)
-		fmt.Fprintf(out, "  echo \"----------------------\"\n")
-		fmt.Fprintf(out, "  echo \"### Executing: %v\"\n", funcName)
-		fmt.Fprintf(out, "  echo \"$%v\"\n", varName)
-		fmt.Fprintf(out, "  %v\n", strings.ReplaceAll(blk.Code, "\n", "\n  "))
+		codeIndented := strings.ReplaceAll(code, "\n", "\n  ")
+		fmt.Fprintf(out, "  %v\n", codeIndented)
 		fmt.Fprintf(out, "}\n")
 
 		fmt.Fprintf(out, "\n")
