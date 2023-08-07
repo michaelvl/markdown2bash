@@ -23,9 +23,9 @@ func markdownCodeBlocks(md []byte) []CodeBlock {
 	doc := p.Parse(md)
 
 	var headings [10]string
-	var currHeadingLevel = 0
-	var id = 0
 	var codeblocks []CodeBlock
+	currHeadingLevel := 0
+	blockID := 0
 
 	for _, c := range doc.GetChildren() {
 		switch node := c.(type) {
@@ -34,11 +34,11 @@ func markdownCodeBlocks(md []byte) []CodeBlock {
 			text := getCombinedText(c.GetChildren())
 			headings[hdr.Level] = text
 			currHeadingLevel = hdr.Level
-			id = 0 // IDs reset within headings
+			blockID = 0 // IDs reset within headings
 		case *ast.CodeBlock:
-			id++
+			blockID++
 			cblk := node
-			blockHeading := strings.Join(headings[1:currHeadingLevel+1], "  ") + fmt.Sprintf("_%04d", id)
+			blockHeading := strings.Join(headings[1:currHeadingLevel+1], "  ") + fmt.Sprintf("_%04d", blockID)
 			blockHeading = strings.ReplaceAll(blockHeading, " ", "_")
 			blockHeading = strings.ReplaceAll(blockHeading, "-", "_")
 			blockHeading = strings.ToLower(blockHeading)
@@ -51,6 +51,7 @@ func markdownCodeBlocks(md []byte) []CodeBlock {
 				})
 		}
 	}
+
 	return codeblocks
 }
 
@@ -76,7 +77,7 @@ func exportToBash(codeblocks []CodeBlock, out io.Writer) {
 
 		fmt.Fprintf(out, "\n")
 	}
-	fmt.Print("\n")
+	fmt.Fprint(out, "\n")
 }
 
 // getCombinedText returns a string that is a combination of Text and
@@ -92,6 +93,7 @@ func getCombinedText(nodes []ast.Node) string {
 			text += string(node.Literal)
 		}
 	}
+
 	return text
 }
 
