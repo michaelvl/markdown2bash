@@ -1,7 +1,5 @@
 #! /bin/bash
 
-echo "Foo"
-
 source readme.sh
 
 echo "Code blocks from README.md are available both as functions and variables."
