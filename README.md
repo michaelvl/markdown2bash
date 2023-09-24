@@ -38,7 +38,7 @@ We can automate testing of this documentation using the
 
 ```bash
 export IMAGE_VERSION=0.0.2
-cat README.md | docker run --rm -i ghcr.io/michaelvl/markdown2bash:$(IMAGE_VERSION) > readme.sh
+cat README.md | docker run --rm -i ghcr.io/michaelvl/markdown2bash:$IMAGE_VERSION > readme.sh
 ```
 
 This will generate a shell script that e.g. includes the first code
